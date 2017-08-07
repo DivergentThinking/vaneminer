@@ -10,3 +10,5 @@ Options:
   -g, --gpu   Use OpenCL Vanityminer for faster mining on supported graphics
               cards                                   [boolean] [default: false]
 ```
+
+Written by @tphecca of Divergent Thinking.
