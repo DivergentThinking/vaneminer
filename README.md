@@ -43,4 +43,5 @@ Options:
 The source code is in the `_coffee/` folder. `index.js` is compiled by
 CoffeeScript 2.0 with gulp. Use `yarn install --dev` to install gulp, etc.
 
-Written by @tphecca of Divergent Thinking.
+Written by [@tphecca](https://github.com/tphecca) of [Divergent Thinking](http://github.com/DivergentThinking).
+Donate Snatcoin here: `1DrhbvTnnz8UdF4QoY5jRwivhZ82uT67YK`. Thanks!
