@@ -1,5 +1,6 @@
 os = require('os')
 fs = require('fs')
+readline = require('readline')
 {spawn} = require('child_process')
 got = require('got')
 argv = require('yargs')
@@ -7,8 +8,16 @@ argv = require('yargs')
   .boolean('gpu')
   .describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards')
   .default('gpu', false, "No OpenCL")
+  .string('prefix')
+  .describe('prefix', "Prefix for Vanitygen to use (e.g. 1snat, 1snats)")
+  .default('prefix', '1snat', "1snat (at least 1 share)")
+  .boolean('sensitive')
+  .describe('sensitive', "Make Vanitygen mine case-sentitively (e.g. mine only for 1SNATS, not 1Snats)")
+  .default('sensitive', false, "Case insensitive")
   .alias('h', 'help')
   .alias('g', 'gpu')
+  .alias('p', 'prefix')
+  .alias('s', 'sensitive')
   .help()
   .argv;
 
@@ -37,40 +46,32 @@ minerExe = switch os.platform()
     else platformNotSupported()
   else platformNotsupported()
 
-prefix = "1Snat"
+prefix = argv.p
 sharePoint = "https://www.snatcoin.com/sendshare.php"
 init = ->
   await download()
   await clkerneldl()
-  vmOpts.push('-iv')
+  vmOpts.push('-vk')
+  unless argv.s then vmOpts.push('-i')
   vmOpts.push(prefix)
   while true then await new Promise (res, rej) ->
     try
       vanitygen = spawn("#{__dirname}/bin/#{minerExe}", vmOpts, { cwd: "#{__dirname}/bin" })
-      outStuff = ""
       errStuff = ""
       vanitygen.stdout.on 'data', (data) =>
         unless data.indexOf("key/s") is -1
-          process.stderr.write(data)
-        outStuff += data
+          readline.cursorTo(process.stdout, 0)
+          data = data.toString()
+          process.stderr.write(data.substr(data.indexOf('['), data.lastIndexOf(']')))
+        unless data.indexOf("Privkey (hex):") is -1
+          runRequest(data)
       vanitygen.stderr.on 'data', (data) =>
         errStuff += data
-        #process.stderr.write(data)
       vanitygen.on 'exit', (code, sig) =>
         unless code is 0
           console.error("Vanitygen exited with code #{code} from signal #{sig}")
           console.error(errStuff)
           process.exit 1
-        privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})/i.exec(outStuff)
-        addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})/.exec(outStuff)
-        console.log("\nSending address: #{privOut?[1]} (#{addrOut?[1]})")
-        do ->
-          try
-            body = await got(sharePoint, { query: { your: myAddr, pub: addrOut?[1], priv: privOut?[1] } })
-            console.log("\nSent work for #{myAddr}! #{body.body}")
-          catch e
-            console.error("Error sending to '#{sharePoint}'...")
-            console.error(e)
         res()
       vanitygen.on 'error', (error) => console.error(error); process.exit 1
     catch e
@@ -79,6 +80,17 @@ init = ->
 
   await return
 
+runRequest = (data) ->
+  privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})/i.exec(data)
+  addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})/.exec(data)
+  console.log("\nSending address: #{privOut?[1]} (#{addrOut?[1]})")
+  do ->
+    try
+      body = await got(sharePoint, { query: { your: myAddr, pub: addrOut?[1], priv: privOut?[1] } })
+      console.log("\nSent work for #{myAddr}! #{body.body}")
+    catch e
+      console.error("Error sending to '#{sharePoint}'...")
+      console.error(e)
 
 vanitygenUrl = "https://vanitygen-bin.surge.sh"
 download = ->

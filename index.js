@@ -1,15 +1,17 @@
 (function() {
-  var argv, clkerneldl, download, fs, got, init, minerExe, myAddr, os, platformNotSupported, prefix, sharePoint, spawn, useGpu, vanitygenUrl, vmOpts;
+  var argv, clkerneldl, download, fs, got, init, minerExe, myAddr, os, platformNotSupported, prefix, readline, runRequest, sharePoint, spawn, useGpu, vanitygenUrl, vmOpts;
 
   os = require('os');
 
   fs = require('fs');
 
+  readline = require('readline');
+
   ({spawn} = require('child_process'));
 
   got = require('got');
 
-  argv = require('yargs').usage("$0 [-g] <your snatcoin address> <vanitygen options...>").boolean('gpu').describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards').default('gpu', false, "No OpenCL").alias('h', 'help').alias('g', 'gpu').help().argv;
+  argv = require('yargs').usage("$0 [-g] <your snatcoin address> <vanitygen options...>").boolean('gpu').describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards').default('gpu', false, "No OpenCL").string('prefix').describe('prefix', "Prefix for Vanitygen to use (e.g. 1snat, 1snats)").default('prefix', '1snat', "1snat (at least 1 share)").boolean('sensitive').describe('sensitive', "Make Vanitygen mine case-sentitively (e.g. mine only for 1SNATS, not 1Snats)").default('sensitive', false, "Case insensitive").alias('h', 'help').alias('g', 'gpu').alias('p', 'prefix').alias('s', 'sensitive').help().argv;
 
   myAddr = argv._.shift();
 
@@ -56,61 +58,45 @@
     }
   })();
 
-  prefix = "1Snat";
+  prefix = argv.p;
 
   sharePoint = "https://www.snatcoin.com/sendshare.php";
 
   init = async function() {
     await download();
     await clkerneldl();
-    vmOpts.push('-iv');
+    vmOpts.push('-vk');
+    if (!argv.s) {
+      vmOpts.push('-i');
+    }
     vmOpts.push(prefix);
     while (true) {
       await new Promise(function(res, rej) {
-        var e, errStuff, outStuff, vanitygen;
+        var e, errStuff, vanitygen;
         try {
           vanitygen = spawn(`${__dirname}/bin/${minerExe}`, vmOpts, {
             cwd: `${__dirname}/bin`
           });
-          outStuff = "";
           errStuff = "";
           vanitygen.stdout.on('data', (data) => {
             if (data.indexOf("key/s") !== -1) {
-              process.stderr.write(data);
+              readline.cursorTo(process.stdout, 0);
+              data = data.toString();
+              process.stderr.write(data.substr(data.indexOf('['), data.lastIndexOf(']')));
             }
-            return outStuff += data;
+            if (data.indexOf("Privkey (hex):") !== -1) {
+              return runRequest(data);
+            }
           });
           vanitygen.stderr.on('data', (data) => {
             return errStuff += data;
           });
-          //process.stderr.write(data)
           vanitygen.on('exit', (code, sig) => {
-            var addrOut, privOut;
             if (code !== 0) {
               console.error(`Vanitygen exited with code ${code} from signal ${sig}`);
               console.error(errStuff);
               process.exit(1);
             }
-            privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})/i.exec(outStuff);
-            addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})/.exec(outStuff);
-            console.log(`\nSending address: ${(privOut != null ? privOut[1] : void 0)} (${(addrOut != null ? addrOut[1] : void 0)})`);
-            (async function() {
-              var body, e;
-              try {
-                body = (await got(sharePoint, {
-                  query: {
-                    your: myAddr,
-                    pub: addrOut != null ? addrOut[1] : void 0,
-                    priv: privOut != null ? privOut[1] : void 0
-                  }
-                }));
-                return console.log(`\nSent work for ${myAddr}! ${body.body}`);
-              } catch (error1) {
-                e = error1;
-                console.error(`Error sending to '${sharePoint}'...`);
-                return console.error(e);
-              }
-            })();
             return res();
           });
           return vanitygen.on('error', (error) => {
@@ -124,6 +110,30 @@
         }
       });
     }
+  };
+
+  runRequest = function(data) {
+    var addrOut, privOut;
+    privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})/i.exec(data);
+    addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})/.exec(data);
+    console.log(`\nSending address: ${(privOut != null ? privOut[1] : void 0)} (${(addrOut != null ? addrOut[1] : void 0)})`);
+    return (async function() {
+      var body, e;
+      try {
+        body = (await got(sharePoint, {
+          query: {
+            your: myAddr,
+            pub: addrOut != null ? addrOut[1] : void 0,
+            priv: privOut != null ? privOut[1] : void 0
+          }
+        }));
+        return console.log(`\nSent work for ${myAddr}! ${body.body}`);
+      } catch (error1) {
+        e = error1;
+        console.error(`Error sending to '${sharePoint}'...`);
+        return console.error(e);
+      }
+    })();
   };
 
   vanitygenUrl = "https://vanitygen-bin.surge.sh";
