@@ -9,7 +9,7 @@
 
   got = require('got');
 
-  argv = require('yargs').usage("$0 [-g] <your snatcoin address> <vanityminer options...>").boolean('gpu').describe('gpu', 'Use OpenCL Vanityminer for faster mining on supported graphics cards').default('gpu', false, "No OpenCL").alias('h', 'help').alias('g', 'gpu').help().argv;
+  argv = require('yargs').usage("$0 [-g] <your snatcoin address> <vanitygen options...>").boolean('gpu').describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards').default('gpu', false, "No OpenCL").alias('h', 'help').alias('g', 'gpu').help().argv;
 
   myAddr = argv._.shift();
 
