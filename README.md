@@ -1,8 +1,7 @@
 # VaneMiner
 ## a vanitygen-based proof-of-work mining software for Snatcoin
 
-### Installation
-
+### Installation:
 This software is currently only supported on Linux 64-bit and Windows 32/64-bit.
 
 Install Node.js 8.2.1 ("Latest Features").
