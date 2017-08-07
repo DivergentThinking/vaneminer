@@ -20,7 +20,8 @@ To install necessary libraries, open `cmd.exe`, and use the command
 appropriately. Then, use the command `npm install`.
 
 After installing libraries, you may now use the `vaneminer.bat` file to start
-mining.
+mining. VaneMiner will automatically download the correct Vanitygen.exe for
+your Windows version.
 
 #### Unix-like
 Running via command line:
@@ -38,10 +39,18 @@ Options:
                    1SNATS, not 1Snats)                [boolean] [default: false]
 ```
 
+VaneMiner will automatically download the correct `vanitygen` binary for your
+platform.
+
 ### Contribution:
 
 The source code is in the `_coffee/` folder. `index.js` is compiled by
 CoffeeScript 2.0 with gulp. Use `yarn install --dev` to install gulp, etc.
+
+Currently, I'd like VaneMiner to support extra platforms like RPi, etc.
+Please feel free to send pull requests with links to binaries for other
+architectures and update my `minerExe` switch statements in index.coffee
+to download those binaries.
 
 Written by [@tphecca](https://github.com/tphecca) of [Divergent Thinking](http://github.com/DivergentThinking).
 Donate Snatcoin here: `1DrhbvTnnz8UdF4QoY5jRwivhZ82uT67YK`. Thanks!
