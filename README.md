@@ -25,12 +25,17 @@ mining.
 #### Unix-like
 Running via command line:
 ```
-node index.js [-g] <your snatcoin address> <vanitygen options...>
+index.js [-g] <your snatcoin address> <vanitygen options...>
+
 
 Options:
-  -h, --help  Show help                                                [boolean]
-  -g, --gpu   Use OpenCL Vanitygen for faster mining on supported graphics cards
-                                                      [boolean] [default: false]
+  -h, --help       Show help                                           [boolean]
+  -g, --gpu        Use OpenCL Vanitygen for faster mining on supported graphics
+                   cards                              [boolean] [default: false]
+  -p, --prefix     Prefix for Vanitygen to use (e.g. 1snat, 1snats)
+                                                     [string] [default: "1snat"]
+  -s, --sensitive  Make Vanitygen mine case-sentitively (e.g. mine only for
+                   1SNATS, not 1Snats)                [boolean] [default: false]
 ```
 
 ### Contribution:
