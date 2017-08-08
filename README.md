@@ -15,9 +15,7 @@ Install Node.js 8.2.1 ("Latest Features").
 
 #### Windows
 Download as .zip from GitHub and extract to a folder.
-To install necessary libraries, open `cmd.exe`, and use the command
-`cd C:\Users\YOURUSER\path\to\extracted\vaneminer` with the path set
-appropriately. Then, use the command `npm install`.
+To install necessary libraries, double-click `run-me-first.bat`.
 
 After installing libraries, you may now use the `vaneminer.bat` file to start
 mining. VaneMiner will automatically download the correct Vanitygen.exe for
