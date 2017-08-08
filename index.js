@@ -113,27 +113,39 @@
   };
 
   runRequest = function(data) {
-    var addrOut, privOut;
-    privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})/i.exec(data);
-    addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})/.exec(data);
-    console.log(`\nSending address: ${(privOut != null ? privOut[1] : void 0)} (${(addrOut != null ? addrOut[1] : void 0)})`);
-    return (async function() {
-      var body, e;
-      try {
-        body = (await got(sharePoint, {
-          query: {
-            your: myAddr,
-            pub: addrOut != null ? addrOut[1] : void 0,
-            priv: privOut != null ? privOut[1] : void 0
-          }
-        }));
-        return console.log(`\nSent work for ${myAddr}! ${body.body}`);
-      } catch (error1) {
-        e = error1;
-        console.error(`Error sending to '${sharePoint}'...`);
-        return console.error(e);
-      }
-    })();
+    var addrOut, i, privOut, results;
+    privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})\n?/igm.exec(data);
+    addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})\n?/igm.exec(data);
+    privOut = [...privOut];
+    addrOut = [...addrOut];
+    if (privOut != null) {
+      privOut.shift();
+    }
+    if (addrOut != null) {
+      addrOut.shift();
+    }
+    results = [];
+    for (i in privOut) {
+      console.log(`\nSending address: ${(privOut != null ? privOut[i] : void 0)} (${(addrOut != null ? addrOut[i] : void 0)}) (${privOut.length}|${addrOut.length})`);
+      results.push((async function() {
+        var body, e;
+        try {
+          body = (await got(sharePoint, {
+            query: {
+              your: myAddr,
+              pub: addrOut != null ? addrOut[i] : void 0,
+              priv: privOut != null ? privOut[i] : void 0
+            }
+          }));
+          return console.log(`\nSent work for ${myAddr}! ${body.body}`);
+        } catch (error1) {
+          e = error1;
+          console.error(`Error sending to '${sharePoint}'...`);
+          return console.error(e);
+        }
+      })());
+    }
+    return results;
   };
 
   vanitygenUrl = "https://vanitygen-bin.surge.sh";

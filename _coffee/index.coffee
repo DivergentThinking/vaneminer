@@ -81,16 +81,20 @@ init = ->
   await return
 
 runRequest = (data) ->
-  privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})/i.exec(data)
-  addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})/.exec(data)
-  console.log("\nSending address: #{privOut?[1]} (#{addrOut?[1]})")
-  do ->
-    try
-      body = await got(sharePoint, { query: { your: myAddr, pub: addrOut?[1], priv: privOut?[1] } })
-      console.log("\nSent work for #{myAddr}! #{body.body}")
-    catch e
-      console.error("Error sending to '#{sharePoint}'...")
-      console.error(e)
+  privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})\n?/igm.exec(data)
+  addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})\n?/igm.exec(data)
+  privOut = [...privOut]
+  addrOut = [...addrOut]
+  privOut?.shift(); addrOut?.shift()
+  for i of privOut
+    console.log("\nSending address: #{privOut?[i]} (#{addrOut?[i]}) (#{privOut.length}|#{addrOut.length})")
+    do ->
+      try
+        body = await got(sharePoint, { query: { your: myAddr, pub: addrOut?[i], priv: privOut?[i] } })
+        console.log("\nSent work for #{myAddr}! #{body.body}")
+      catch e
+        console.error("Error sending to '#{sharePoint}'...")
+        console.error(e)
 
 vanitygenUrl = "https://vanitygen-bin.surge.sh"
 download = ->
