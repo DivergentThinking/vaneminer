@@ -22,7 +22,7 @@ argv = require('yargs')
   .argv;
 
 myAddr = argv._.shift();
-vmOpts = if process.env["VANITYGEN_OPTIONS"]? then process.env["VANITYGEN_OPTIONS"].split(' ') else []
+vmOpts = if process.env["VANITYGEN_OPTIONS"]? and process.env["VANITYGEN_OPTIONS"].trim() isnt "" then process.env["VANITYGEN_OPTIONS"].split(' ') else []
 useGpu = argv.g;
 if not myAddr?
   console.error "No Snatcoin address provided! See --help."

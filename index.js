@@ -15,7 +15,7 @@
 
   myAddr = argv._.shift();
 
-  vmOpts = process.env["VANITYGEN_OPTIONS"] != null ? process.env["VANITYGEN_OPTIONS"].split(' ') : [];
+  vmOpts = (process.env["VANITYGEN_OPTIONS"] != null) && process.env["VANITYGEN_OPTIONS"].trim() !== "" ? process.env["VANITYGEN_OPTIONS"].split(' ') : [];
 
   useGpu = argv.g;
 
