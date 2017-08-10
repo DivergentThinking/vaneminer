@@ -83,6 +83,7 @@ init = ->
 runRequest = (data) ->
   privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})\n?/igm.exec(data)
   addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})\n?/igm.exec(data)
+  return if not privOut? and not addrOut?
   privOut = [...privOut]
   addrOut = [...addrOut]
   privOut?.shift(); addrOut?.shift()

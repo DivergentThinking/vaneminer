@@ -116,6 +116,9 @@
     var addrOut, i, privOut, results;
     privOut = /Privkey \(hex\): ([0-9A-Fa-f]{64})\n?/igm.exec(data);
     addrOut = /Address: ([13][a-km-zA-HJ-NP-Z1-9]{25,34})\n?/igm.exec(data);
+    if ((privOut == null) && (addrOut == null)) {
+      return;
+    }
     privOut = [...privOut];
     addrOut = [...addrOut];
     if (privOut != null) {
