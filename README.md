@@ -24,8 +24,8 @@ your Windows version.
 #### Unix-like
 Running via command line:
 ```
-index.js [-g] <your snatcoin address> <vanitygen options...>
-
+index.js [-g] <your snatcoin address>
+Use environment variable VANITYGEN_OPTIONS to set options for Vanitygen.
 
 Options:
   -h, --help       Show help                                           [boolean]

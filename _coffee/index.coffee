@@ -4,7 +4,7 @@ readline = require('readline')
 {spawn} = require('child_process')
 got = require('got')
 argv = require('yargs')
-  .usage("$0 [-g] <your snatcoin address> <vanitygen options...>")
+  .usage("$0 [-g] <your snatcoin address>\nUse environment variable VANITYGEN_OPTIONS to set options for Vanitygen.")
   .boolean('gpu')
   .describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards')
   .default('gpu', false, "No OpenCL")
@@ -22,7 +22,7 @@ argv = require('yargs')
   .argv;
 
 myAddr = argv._.shift();
-vmOpts = argv._;
+vmOpts = if process.env["VANITYGEN_OPTIONS"]? then process.env["VANITYGEN_OPTIONS"].split(' ') else []
 useGpu = argv.g;
 if not myAddr?
   console.error "No Snatcoin address provided! See --help."
@@ -56,6 +56,7 @@ init = ->
   vmOpts.push(prefix)
   while true then await new Promise (res, rej) ->
     try
+      console.log("Running './bin/#{minerExe} #{vmOpts.join(' ')}'")
       vanitygen = spawn("#{__dirname}/bin/#{minerExe}", vmOpts, { cwd: "#{__dirname}/bin" })
       errStuff = ""
       vanitygen.stdout.on 'data', (data) =>

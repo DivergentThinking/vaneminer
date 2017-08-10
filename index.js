@@ -11,11 +11,11 @@
 
   got = require('got');
 
-  argv = require('yargs').usage("$0 [-g] <your snatcoin address> <vanitygen options...>").boolean('gpu').describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards').default('gpu', false, "No OpenCL").string('prefix').describe('prefix', "Prefix for Vanitygen to use (e.g. 1snat, 1snats)").default('prefix', '1snat', "1snat (at least 1 share)").boolean('sensitive').describe('sensitive', "Make Vanitygen mine case-sentitively (e.g. mine only for 1SNATS, not 1Snats)").default('sensitive', false, "Case insensitive").alias('h', 'help').alias('g', 'gpu').alias('p', 'prefix').alias('s', 'sensitive').help().argv;
+  argv = require('yargs').usage("$0 [-g] <your snatcoin address>\nUse environment variable VANITYGEN_OPTIONS to set options for Vanitygen.").boolean('gpu').describe('gpu', 'Use OpenCL Vanitygen for faster mining on supported graphics cards').default('gpu', false, "No OpenCL").string('prefix').describe('prefix', "Prefix for Vanitygen to use (e.g. 1snat, 1snats)").default('prefix', '1snat', "1snat (at least 1 share)").boolean('sensitive').describe('sensitive', "Make Vanitygen mine case-sentitively (e.g. mine only for 1SNATS, not 1Snats)").default('sensitive', false, "Case insensitive").alias('h', 'help').alias('g', 'gpu').alias('p', 'prefix').alias('s', 'sensitive').help().argv;
 
   myAddr = argv._.shift();
 
-  vmOpts = argv._;
+  vmOpts = process.env["VANITYGEN_OPTIONS"] != null ? process.env["VANITYGEN_OPTIONS"].split(' ') : [];
 
   useGpu = argv.g;
 
@@ -74,6 +74,7 @@
       await new Promise(function(res, rej) {
         var e, errStuff, vanitygen;
         try {
+          console.log(`Running './bin/${minerExe} ${vmOpts.join(' ')}'`);
           vanitygen = spawn(`${__dirname}/bin/${minerExe}`, vmOpts, {
             cwd: `${__dirname}/bin`
           });
